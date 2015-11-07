@@ -154,6 +154,7 @@ namespace NetworkVisualizer {
                     // Delete the by-product files
                     File.Delete(file_pairs);
                     File.Delete(dirByProducts + egoUser);
+                    Directory.Delete(dirByProducts);
                 } catch (FileNotFoundException e) {
                     Console.WriteLine(e);
                 } catch (Exception e) {
