@@ -1,0 +1,25 @@
+svg {
+	border: 1px solid #ccc;
+}
+
+.node {
+	stroke-width: 1.5px;
+}
+
+.node text {
+	font: 10px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+}
+
+.link {
+	stroke: #aaa;
+	stroke-opacity: .3;
+}
+
+circle {
+	stroke-width: 1.5px;
+}
+
+.graphinfo {
+	font: 9pt "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+	dominant-baseline: middle;
+}
