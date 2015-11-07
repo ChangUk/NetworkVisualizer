@@ -72,16 +72,31 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="bin\Release\Visualizer\data\18217810.json" />
+    <None Include="bin\Release\Visualizer\data\18560669.json" />
+    <None Include="bin\Release\Visualizer\data\185662982.json" />
+    <None Include="bin\Release\Visualizer\data\18966211.json" />
+    <None Include="bin\Release\Visualizer\data\191260592.json" />
+    <None Include="bin\Release\Visualizer\data\272163679.json" />
+    <None Include="bin\Release\Visualizer\data\345853492.json" />
+    <None Include="bin\Release\Visualizer\data\382259089.json" />
+    <None Include="bin\Release\Visualizer\data\394479602.json" />
+    <None Include="bin\Release\Visualizer\data\416015270.json" />
+    <None Include="bin\Release\Visualizer\data\419667140.json" />
+    <None Include="bin\Release\Visualizer\data\426428537.json" />
+    <None Include="bin\Release\Visualizer\data\59236432.json" />
+    <None Include="bin\Release\Visualizer\data\599926041.json" />
+    <None Include="bin\Release\Visualizer\data\919245295.json" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="Visualizer\data\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Visualizer\css\style.css" />
-    <Content Include="Visualizer\index.html" />
-    <Content Include="Visualizer\js\d3.v3.min.js" />
-    <Content Include="Visualizer\js\visualizer.js" />
+    <Content Include="bin\Release\FastModularity\FastModularity.exe" />
+    <Content Include="bin\Release\FastModularity\vc_redist.x86.exe" />
+    <Content Include="bin\Release\Visualizer\css\style.css" />
+    <Content Include="bin\Release\Visualizer\index.html" />
+    <Content Include="bin\Release\Visualizer\js\d3.v3.min.js" />
+    <Content Include="bin\Release\Visualizer\js\visualizer.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.98.1\build\net451\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.98.1\build\net451\System.Data.SQLite.Core.targets')" />
