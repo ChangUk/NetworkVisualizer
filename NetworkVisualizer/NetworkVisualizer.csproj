@@ -73,10 +73,9 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="Visualizer\data\miserables.json" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Visualizer\data\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="FastModularity\FastModularity.exe" />
     <Content Include="Visualizer\css\style.css" />
