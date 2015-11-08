@@ -29,7 +29,9 @@ function handleFileSelect(event) {
         var doctype = '<?xml version="1.0" standalone="no"?>'
             + '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">';
         var serializer = new XMLSerializer();
+        svg.select(".graphinfo").style("visibility", "hidden")
         var source = serializer.serializeToString(d3.select("svg").node());
+        svg.select(".graphinfo").style("visibility", "visible")
         var blob = new Blob([doctype + source], { type: "image/svg+xml" });
         saveAs(blob, getFilenameWithoutExtension(curFilename) + ".svg");
     });
@@ -39,7 +41,9 @@ function handleFileSelect(event) {
         var doctype = '<?xml version="1.0" standalone="no"?>'
             + '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">';
         var serializer = new XMLSerializer();
+        svg.select(".graphinfo").style("visibility", "hidden")
         var source = serializer.serializeToString(d3.select("svg").node());
+        svg.select(".graphinfo").style("visibility", "visible")
         var blob = new Blob([doctype + source], { type: "image/svg+xml" });
         var url = window.URL.createObjectURL(blob);
 
@@ -180,6 +184,8 @@ function updateWindow() {
     width = window.innerWidth - 2;
     height = window.innerHeight - 92;
     svg.attr("width", width).attr("height", height);
+    svg.select(".graphinfo")
+        .attr("transform", "translate(" + (width - 10) + ", " + (height - 10) + ")")
 
     force.graph = curGraph;
     var newK = Math.sqrt(force.graph.nodes.length / (width * height));
