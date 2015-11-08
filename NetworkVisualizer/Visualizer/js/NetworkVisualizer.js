@@ -1,4 +1,5 @@
 document.getElementById("fileinput").addEventListener("change", handleFileSelect, false);
+document.addEventListener("keyup", shortcutHandler, false);
 
 var force;
 var curGraph;
@@ -8,60 +9,114 @@ var height = window.innerHeight - 92;
 
 var svg = d3.select("body").append("svg")
 	.attr("width", width)
-	.attr("height", height);
-var color = d3.scale.category10()
-d3.select("svg").append("text")
+	.attr("height", height)
+    .call(d3.behavior.zoom().scaleExtent([0.1, 10]).on("zoom", function () {
+        console.log(d3.behavior.zoom().translate() + ", " + d3.behavior.zoom().scale())
+        console.log(d3.event.translate + ", " + d3.event.scale)
+        svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")")
+    }))
+    .append("g");
+
+// Color setting
+var color = d3.scale.category10();
+var color_node_stroke = "#aaa"
+var color_node_stroke_selected = "#555"
+var color_link_stroke = "#aaa"
+var color_link_stroke_selected = "#555"
+var color_link_opacity = .3;
+var color_link_opacity_selected = 1;
+
+svg.append("text")
     .attr("transform", "translate(" + (width / 2) + ", " + (height / 2) + ")")
 	.style("text-anchor", "middle")
     .style("font", '10pt "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif')
-    .text("No network file.")
+    .text("No network file.");
 
 function handleFileSelect(event) {
     var files = event.target.files;
     if (curFilename !== files[0].name) {
-        d3.select("svg").selectAll("*").remove();
+        d3.select("svg").select("g").selectAll("*").remove();
+        d3.select(".graphinfo").remove();
+        resetPosition();
+
         curFilename = files[0].name;
         visualize("data/" + curFilename);
     }
 
     // Button click function to save d3 rendering as SVG format
-    d3.select("#save_as_svg").on("click", function () {
-        var doctype = '<?xml version="1.0" standalone="no"?>'
-            + '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">';
-        var serializer = new XMLSerializer();
-        svg.select(".graphinfo").style("visibility", "hidden")
-        var source = serializer.serializeToString(d3.select("svg").node());
-        svg.select(".graphinfo").style("visibility", "visible")
-        var blob = new Blob([doctype + source], { type: "image/svg+xml" });
-        saveAs(blob, getFilenameWithoutExtension(curFilename) + ".svg");
-    });
+    d3.select("#save_as_svg").on("click", saveSVG);
 
     // Button click function to save d3 rendering as PNG format
-    d3.select("#save_as_png").on("click", function () {
-        var doctype = '<?xml version="1.0" standalone="no"?>'
-            + '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">';
-        var serializer = new XMLSerializer();
-        svg.select(".graphinfo").style("visibility", "hidden")
-        var source = serializer.serializeToString(d3.select("svg").node());
-        svg.select(".graphinfo").style("visibility", "visible")
-        var blob = new Blob([doctype + source], { type: "image/svg+xml" });
-        var url = window.URL.createObjectURL(blob);
+    d3.select("#save_as_png").on("click", savePNG);
+}
 
-        var canvas = document.querySelector("canvas");
-        canvas.setAttribute("width", width);
-        canvas.setAttribute("height", height);
-        var context = canvas.getContext("2d");
+// Keyboard shortcut handler
+function shortcutHandler(event) {
+    switch (event.keyCode) {
+        case 76:    // l
+            hideLabel();
+            return;
+        case 80:    // p
+            savePNG();
+            return;
+        case 82:    // r
+            resetPosition();
+            return;
+        case 83:    // s
+            saveSVG();
+            return;
+    }
+}
 
-        var image = new Image;
-        image.src = url;
-        image.onload = function () {
-            context.drawImage(image, 0, 0);
-            var a = document.createElement("a");
-            a.download = getFilenameWithoutExtension(curFilename) + ".png";
-            a.href = canvas.toDataURL("image/png");
-            a.click();
-        };
+// Save rendering image as SVG file
+function saveSVG() {
+    var doctype = '<?xml version="1.0" standalone="no"?>'
+        + '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">';
+    var serializer = new XMLSerializer();
+    d3.select(".graphinfo").style("visibility", "hidden")
+    var source = serializer.serializeToString(d3.select("svg").node());
+    d3.select(".graphinfo").style("visibility", "visible")
+    var blob = new Blob([doctype + source], { type: "image/svg+xml" });
+    saveAs(blob, getFilenameWithoutExtension(curFilename) + ".svg");
+}
+
+// Save rendering image as PNG file
+function savePNG() {
+    var doctype = '<?xml version="1.0" standalone="no"?>'
+        + '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">';
+    var serializer = new XMLSerializer();
+    d3.select(".graphinfo").style("visibility", "hidden")
+    var source = serializer.serializeToString(d3.select("svg").node());
+    d3.select(".graphinfo").style("visibility", "visible")
+    var blob = new Blob([doctype + source], { type: "image/svg+xml" });
+    var url = window.URL.createObjectURL(blob);
+
+    var canvas = document.querySelector("canvas");
+    canvas.setAttribute("width", width);
+    canvas.setAttribute("height", height);
+    var context = canvas.getContext("2d");
+
+    var image = new Image;
+    image.src = url;
+    image.onload = function () {
+        context.drawImage(image, 0, 0);
+        var a = document.createElement("a");
+        a.download = getFilenameWithoutExtension(curFilename) + ".png";
+        a.href = canvas.toDataURL("image/png");
+        a.click();
+    };
+}
+
+// Turn on / off label
+var showLabel = true;
+function hideLabel() {
+    svg.selectAll(".node").select("text").style("visibility", function () {
+        if (showLabel)
+            return "hidden";
+        else
+            return "visible";
     });
+    showLabel = !showLabel;
 }
 
 function visualize(filename) {
@@ -74,7 +129,8 @@ function visualize(filename) {
 			}).entries(graph.nodes).length - 1;
 		
 		// Show graph information
-		svg.append("text")
+	    d3.select("svg")
+            .append("text")
 			.attr("class", "graphinfo")
 			.attr("transform", "translate(" + (width - 10) + ", " + (height - 10) + ")")
 			.style("opacity", 0)
@@ -113,52 +169,82 @@ function visualize(filename) {
 					return -15 / k;
 			})
 			.start()
-		
-		var link = svg.selectAll(".link")
+
+	    // Link styling
+	    var link = svg.selectAll(".link")
 			.data(graph.links)
 			.enter()
 			.append("line")
 			.attr("class", "link")
 			.style("stroke-width", function (d) { return d.value })
             .style("stroke", "#aaa")
-	        .style("stroke-opacity", 0.3)
+	        .style("stroke-opacity", .3)
+
+	    // Link connection
+	    var linked = {};
+	    graph.links.forEach(function (l) {
+	        linked[l.source.index + ", " + l.target.index] = 1;
+	    });
 		
+	    // Node styling
 		var node = svg.selectAll(".node")
 			.data(graph.nodes)
 			.enter()
 			.append("g")
 			.attr("class", "node")
             .style("stroke-width", 1.5)
-			.on("mouseover", mouseover)
-			.on("mouseout", mouseout)
+			.on("mouseover", function (d) {
+			    node.select("circle").style("stroke", function (d2) {
+			        if (isConnected(d, d2))
+			            return color_node_stroke_selected;
+			        else
+			            return color_node_stroke;
+			    });
+			    link.style("stroke", function (l) {
+			        if (l.source === d || l.target === d)
+			            return color_link_stroke_selected;
+			        else
+			            return color_link_stroke;
+			    }).style("stroke-opacity", function (l) {
+			        if (l.source === d || l.target === d)
+			            return color_link_opacity_selected;
+			        else
+			            return color_link_opacity;
+			    })
+			    d3.select(this).select("circle").style("stroke", color_node_stroke_selected);
+			})
+			.on("mouseout", function (d) {
+			    node.select("circle").style("stroke", color_node_stroke);
+			    link.style("stroke", color_link_stroke).style("stroke-opacity", color_link_opacity);
+			    d3.select(this).select("circle").style("stroke", color_node_stroke);
+			})
 			.call(force.drag)
 			
 		node.append("circle")
-			.attr("r", 8)
+			.attr("r", 10)
 			.style("fill", function(d) {
 				if (d.group === -1) return "#fff";
 				else return color(d.group);
 			})
-			.style("opacity", function(d) {
-				if (d.group === -1) return .7;
-				else return 1;
-			})
-			.style("stroke", function(d) {
-				if (d.group === -1) return "#aaa";
-				else return color(d.group);
-			})
+			.style("stroke", color_node_stroke)
             .style("stroke-width", 1.5)
 			.style("stroke-opacity", function(d) {
 				if (d.group === -1) return .7;
 				else return 1;
 			})
 			
+        // Show node id
 		node.append("text")
 			.attr("dx", 12)
 			.attr("dy", ".35em")
             .style("font", '10px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif')
 			.text(function(d) { return d.name })
-			
+
+        // Check if noad A and node B are connected each other
+		function isConnected(a, b) {
+		    return linked[a.index + ", " + b.index] || linked[b.index + ", " + a.index];
+		}
+
 		force.on("tick", function() {
 			link.attr("x1", function(d) { return d.source.x })
 				.attr("y1", function(d) { return d.source.y })
@@ -168,14 +254,6 @@ function visualize(filename) {
 				return "translate(" + d.x + "," + d.y + ")"
 			})
 		})
-		
-		// Mouse actions
-		function mouseover() {
-			d3.select(this).select("circle").transition().duration(500).attr("r", 16)
-		}
-		function mouseout() {
-			d3.select(this).select("circle").transition().duration(500).attr("r", 8)
-		}
 	})
 }
 
@@ -183,8 +261,8 @@ function visualize(filename) {
 function updateWindow() {
     width = window.innerWidth - 2;
     height = window.innerHeight - 92;
-    svg.attr("width", width).attr("height", height);
-    svg.select(".graphinfo")
+    d3.select("svg").attr("width", width).attr("height", height);
+    d3.select(".graphinfo")
         .attr("transform", "translate(" + (width - 10) + ", " + (height - 10) + ")")
 
     force.graph = curGraph;
@@ -200,6 +278,11 @@ function updateWindow() {
         .resume();
 }
 window.onresize = updateWindow;
+
+// Reset svg attribute values
+function resetPosition() {
+    svg.attr("transform", "translate(0, 0) scale(1)");
+}
 
 // Get JSON file name without file extension(.json)
 function getFilenameWithoutExtension(filename) {
