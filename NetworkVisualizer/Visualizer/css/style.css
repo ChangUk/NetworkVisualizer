@@ -1,25 +1,17 @@
+body {
+    margin: 0;
+    background-color: #f8f8f8;
+}
+
+div {
+    padding: 5px 10px 5px 10px;
+}
+
+h1 {
+    margin: 0px;
+}
+
 svg {
-	border: 1px solid #ccc;
-}
-
-.node {
-	stroke-width: 1.5px;
-}
-
-.node text {
-	font: 10px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
-}
-
-.link {
-	stroke: #aaa;
-	stroke-opacity: .3;
-}
-
-circle {
-	stroke-width: 1.5px;
-}
-
-.graphinfo {
-	font: 9pt "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
-	dominant-baseline: middle;
+	border: 1px solid #ddd;
+    background-color: #fff;
 }

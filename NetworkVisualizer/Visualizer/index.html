@@ -1,4 +1,4 @@
-<html>
+﻿<html>
 	<head>
 		<meta charset="utf-8">
 		<title>Twitter Network Visualization</title>
@@ -6,10 +6,18 @@
 		<link rel="stylesheet" type="text/css" href="css/style.css">
 	</head>
 	<body>
-		<h1>Twitter Ego-Network Visualization</h1>
-		<div>
-			<p>Choose a network file(*.json) in the data directory: <input type="file" id="fileinput" name="file" accept=".json" /></p>
-		</div>
-		<script src="js/visualizer.js"></script>
+        <div style="height: 45px;">
+            <h1>Twitter Ego-Network Visualization</h1>
+        </div>
+        <div style="height: 25px; float: left;">
+            Choose a network file(*.json) in the data directory: <input type="file" id="fileinput" name="file" accept=".json" />
+        </div>
+        <div style="height: 25px; float: right;">
+            <button id="save_as_svg">Save as SVG</button>
+            <button id="save_as_png">Save as PNG</button>
+        </div>
+		<script src="js/NetworkVisualizer.js"></script>
+        <script src="js/FileSaver.js"></script>
+        <canvas hidden="hidden"></canvas>
 	</body>
 </html>
