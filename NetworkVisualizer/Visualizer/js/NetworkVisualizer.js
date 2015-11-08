@@ -1,6 +1,21 @@
 document.getElementById("fileinput").addEventListener("change", handleFileSelect, false);
 
+var force;
+var curGraph;
 var curFilename = "";
+var width = window.innerWidth - 2;
+var height = window.innerHeight - 92;
+
+var svg = d3.select("body").append("svg")
+	.attr("width", width)
+	.attr("height", height);
+var color = d3.scale.category10()
+d3.select("svg").append("text")
+    .attr("transform", "translate(" + (width / 2) + ", " + (height / 2) + ")")
+	.style("text-anchor", "middle")
+    .style("font", '10pt "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif')
+    .text("No network file.")
+
 function handleFileSelect(event) {
     var files = event.target.files;
     if (curFilename !== files[0].name) {
@@ -45,18 +60,6 @@ function handleFileSelect(event) {
     });
 }
 
-var width = window.innerWidth - 2;
-var height = window.innerHeight - 92;
-var svg = d3.select("body").append("svg")
-	.attr("width", width)
-	.attr("height", height);
-var color = d3.scale.category10()
-d3.select("svg").append("text")
-    .attr("transform", "translate(" + (width / 2) + ", " + (height / 2) + ")")
-	.style("text-anchor", "middle")
-    .style("font", '10pt "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif')
-    .text("No network file.")
-
 function visualize(filename) {
 	d3.json(filename, function(error, graph) {
 		// Graph information
@@ -85,7 +88,8 @@ function visualize(filename) {
 		
 		var k = Math.sqrt(graph.nodes.length / (width * height));
 		
-		var force = d3.layout.force()
+		curGraph = graph;
+		force = d3.layout.force()
 			.gravity(100 * k)				// Gravity between nodes
 			.size([width, height])
 			.nodes(graph.nodes)
@@ -176,6 +180,18 @@ function updateWindow() {
     width = window.innerWidth - 2;
     height = window.innerHeight - 92;
     svg.attr("width", width).attr("height", height);
+
+    force.graph = curGraph;
+    var newK = Math.sqrt(force.graph.nodes.length / (width * height));
+    force.size([width, height])
+        .gravity(100 * newK)		    // Gravity between nodes
+		.charge(function (node) {	    // Force to charge(push) each other
+			if (node.group === 0)
+			    return -30 / newK;
+			else
+			    return -15 / newK;
+		})
+        .resume();
 }
 window.onresize = updateWindow;
 
