@@ -15,3 +15,10 @@ svg {
 	border: 1px solid #ddd;
     background-color: #fff;
 }
+
+div.helptable {
+    margin: 0 auto;
+    padding: 0;
+    position: absolute;
+    top: 40%;
+}

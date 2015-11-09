@@ -73,7 +73,8 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-    <None Include="Visualizer\data\miserables.json" />
+    <None Include="Visualizer\data\help.tsv" />
+    <None Include="Visualizer\data\sample.json" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

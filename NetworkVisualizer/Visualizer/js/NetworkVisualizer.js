@@ -1,46 +1,11 @@
+// File selection
 document.getElementById("fileinput").addEventListener("change", handleFileSelect, false);
-document.addEventListener("keyup", shortcutHandler, false);
-
-var force;
-var curGraph;
-var curFilename = "";
-var width = window.innerWidth - 2;
-var height = window.innerHeight - 92;
-
-var svg = d3.select("body").append("svg")
-	.attr("width", width)
-	.attr("height", height)
-    .call(d3.behavior.zoom().scaleExtent([0.1, 10]).on("zoom", function () {
-        console.log(d3.behavior.zoom().translate() + ", " + d3.behavior.zoom().scale())
-        console.log(d3.event.translate + ", " + d3.event.scale)
-        svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")")
-    }))
-    .append("g");
-
-// Color setting
-var color = d3.scale.category10();
-var color_node_stroke = "#aaa"
-var color_node_stroke_selected = "#555"
-var color_link_stroke = "#aaa"
-var color_link_stroke_selected = "#555"
-var color_link_opacity = .3;
-var color_link_opacity_selected = 1;
-
-svg.append("text")
-    .attr("transform", "translate(" + (width / 2) + ", " + (height / 2) + ")")
-	.style("text-anchor", "middle")
-    .style("font", '10pt "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif')
-    .text("No network file.");
-
 function handleFileSelect(event) {
     var files = event.target.files;
     if (curFilename !== files[0].name) {
-        d3.select("svg").select("g").selectAll("*").remove();
-        d3.select(".graphinfo").remove();
-        resetPosition();
-
-        curFilename = files[0].name;
-        visualize("data/" + curFilename);
+        d3.select(".helptable")
+            .style("visibility", "hidden")
+        reDraw(files[0].name);
     }
 
     // Button click function to save d3 rendering as SVG format
@@ -50,22 +15,119 @@ function handleFileSelect(event) {
     d3.select("#save_as_png").on("click", savePNG);
 }
 
-// Keyboard shortcut handler
+// Keyboard shortcut
+document.addEventListener("keyup", shortcutHandler, false);
 function shortcutHandler(event) {
     switch (event.keyCode) {
         case 76:    // l
             hideLabel();
             return;
+        case 79:    // o
+            resetZoom();
+            return;
         case 80:    // p
             savePNG();
             return;
         case 82:    // r
-            resetPosition();
+            reDraw(curFilename);
             return;
         case 83:    // s
             saveSVG();
             return;
     }
+}
+
+// Current indicator
+var force;
+var curFilename = "";
+
+// Canvas size
+var width = window.innerWidth - 2;
+var height = window.innerHeight - 92;
+
+// Color setting
+var color = d3.scale.category10();
+var color_node_stroke = "#aaa";
+var color_node_stroke_selected = "#555";
+var color_text_label = "#aaa";
+var color_text_label_selected = "#555";
+var color_link_stroke = "#aaa";
+var color_link_stroke_selected = "#555";
+var color_link_opacity = .3;
+var color_link_opacity_selected = 1;
+
+// Zoom
+var zoom = d3.behavior.zoom()
+    .scaleExtent([0.1, 10])
+    .on("zoom", function () {
+        svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")")
+    });
+
+// svg
+var svg = d3.select("body").append("svg")
+	.attr("width", width)
+	.attr("height", height)
+    .style("cursor", "move")
+    .call(zoom)
+    .append("g");
+
+// Help message
+d3.tsv("data/help.tsv", function (error, data) {
+    var shortcut = []
+    var functions = []
+    for (var i = 0; i < data.length; i++) {
+        shortcut.push(data[i].shortcut);
+        functions.push(data[i].function);
+    }
+
+    function tubulate(data) {
+        var columns = ["shortcut", "function"];
+        var table = d3.select("body").append("div")
+            .attr("class", "helptable")
+            .style("width", window.innerWidth)
+            .append("table")
+            .attr("align", "center");
+        var thead = table.append("thead");
+        var tbody = table.append("tbody");
+        thead.append("tr")
+            .selectAll("th")
+            .data(columns)
+            .enter()
+            .append("th")
+            .text(function (column) { return column; });
+
+        var rows = tbody.selectAll("tr")
+            .data(data)
+            .enter()
+            .append("tr");
+
+        var cells = rows.selectAll("td")
+            .data(function (row) {
+                return columns.map(function (column) {
+                    return { column: column, value: row[column] };
+                });
+            })
+            .enter()
+            .append("td")
+            .style("text-anchor", "middle")
+            .style("dominant-baseline", "middle")
+            .style("font", '10pt "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif')
+            .html(function (d) { return d.value; });
+
+        return table;
+    }
+
+    tubulate(data);
+});
+
+// Redraw image
+function reDraw(filename) {
+    d3.select("svg").select("g").selectAll("*").remove();
+    d3.select(".graphinfo").remove();
+    resetZoom();
+
+    curFilename = filename;
+    visualize("data/" + curFilename);
 }
 
 // Save rendering image as SVG file
@@ -135,6 +197,7 @@ function visualize(filename) {
 			.attr("transform", "translate(" + (width - 10) + ", " + (height - 10) + ")")
 			.style("opacity", 0)
             .style("font", '9pt "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif')
+            .style("fill", color_text_label_selected)
             .style("dominant-baseline", "middle")
 			.transition()
 			.duration(5000)
@@ -148,7 +211,6 @@ function visualize(filename) {
 		
 		var k = Math.sqrt(graph.nodes.length / (width * height));
 		
-		curGraph = graph;
 		force = d3.layout.force()
 			.gravity(100 * k)				// Gravity between nodes
 			.size([width, height])
@@ -194,12 +256,27 @@ function visualize(filename) {
 			.attr("class", "node")
             .style("stroke-width", 1.5)
 			.on("mouseover", function (d) {
-			    node.select("circle").style("stroke", function (d2) {
-			        if (isConnected(d, d2))
-			            return color_node_stroke_selected;
-			        else
-			            return color_node_stroke;
-			    });
+			    d3.select("svg").style("cursor", "auto");
+			    node.select("circle")
+                    .style("stroke", function (d2) {
+			            if (isConnected(d, d2))
+			                return color_node_stroke_selected;
+			            else
+			                return color_node_stroke;
+			        });
+			    d3.select(this).select("circle")
+                    .style("stroke", color_node_stroke_selected);
+
+			    node.select("text")
+                    .style("fill", function (d2) {
+			            if (isConnected(d, d2))
+			                return color_text_label_selected;
+			            else
+			                return color_text_label;
+			        });
+			    d3.select(this).select("text")
+                    .style("fill", color_text_label_selected);
+
 			    link.style("stroke", function (l) {
 			        if (l.source === d || l.target === d)
 			            return color_link_stroke_selected;
@@ -211,12 +288,19 @@ function visualize(filename) {
 			        else
 			            return color_link_opacity;
 			    })
-			    d3.select(this).select("circle").style("stroke", color_node_stroke_selected);
 			})
+            .on("mousedown", function (d) {
+                d3.event.stopPropagation();     // Prevent svg panning
+            })
 			.on("mouseout", function (d) {
-			    node.select("circle").style("stroke", color_node_stroke);
+			    d3.select("svg").style("cursor", "move");
+
+			    node.select("circle")
+                    .style("stroke", color_node_stroke);
+			    node.select("text")
+                    .style("fill", color_text_label);
+
 			    link.style("stroke", color_link_stroke).style("stroke-opacity", color_link_opacity);
-			    d3.select(this).select("circle").style("stroke", color_node_stroke);
 			})
 			.call(force.drag)
 			
@@ -229,8 +313,7 @@ function visualize(filename) {
 			.style("stroke", color_node_stroke)
             .style("stroke-width", 1.5)
 			.style("stroke-opacity", function(d) {
-				if (d.group === -1) return .7;
-				else return 1;
+				return 1;
 			})
 			
         // Show node id
@@ -238,6 +321,7 @@ function visualize(filename) {
 			.attr("dx", 12)
 			.attr("dy", ".35em")
             .style("font", '10px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif')
+            .style("fill", color_text_label)
 			.text(function(d) { return d.name })
 
         // Check if noad A and node B are connected each other
@@ -262,11 +346,11 @@ function updateWindow() {
     width = window.innerWidth - 2;
     height = window.innerHeight - 92;
     d3.select("svg").attr("width", width).attr("height", height);
+    d3.select(".helptable").style("width", window.innerWidth);
     d3.select(".graphinfo")
-        .attr("transform", "translate(" + (width - 10) + ", " + (height - 10) + ")")
+        .attr("transform", "translate(" + (width - 10) + ", " + (height - 10) + ")");
 
-    force.graph = curGraph;
-    var newK = Math.sqrt(force.graph.nodes.length / (width * height));
+    var newK = Math.sqrt(force.nodes().length / (width * height));
     force.size([width, height])
         .gravity(100 * newK)		    // Gravity between nodes
 		.charge(function (node) {	    // Force to charge(push) each other
@@ -280,8 +364,10 @@ function updateWindow() {
 window.onresize = updateWindow;
 
 // Reset svg attribute values
-function resetPosition() {
-    svg.attr("transform", "translate(0, 0) scale(1)");
+function resetZoom() {
+    zoom.scale(1);
+    zoom.translate([0, 0]);
+    svg.transition().duration(300).attr('transform', 'translate(' + zoom.translate() + ') scale(' + zoom.scale() + ')')
 }
 
 // Get JSON file name without file extension(.json)

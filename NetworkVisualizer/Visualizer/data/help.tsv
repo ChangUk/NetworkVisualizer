@@ -1,0 +1,8 @@
+shortcut	function
+r	Redraw image
+o	Reset position of image
+l	Show/hide labels of nodes
+s	Save image as SVG format (*.svg)
+p	Save image as PNG format (*.png)
+Scroll	Zoom in/out
+Drag	Move image

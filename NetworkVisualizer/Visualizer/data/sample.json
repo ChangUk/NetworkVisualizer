@@ -1,0 +1,36 @@
+{
+	"nodes": [
+		{"name":"Park","group":0},
+		{"name":"Pyun","group":1},
+		{"name":"Kim","group":-1},
+		{"name":"Lee","group":2},
+		{"name":"Choi","group":2},
+		{"name":"Kang","group":2},
+		{"name":"Hong","group":2},
+		{"name":"Song","group":1},
+		{"name":"Ryu","group":-1},
+		{"name":"Jin","group":2},
+		{"name":"Seo","group":-1},
+		{"name":"Jung","group":1}
+	], "links": [
+		{"source":0,"target":1,"value":4},
+		{"source":0,"target":2,"value":1},
+		{"source":0,"target":3,"value":1},
+		{"source":0,"target":4,"value":1},
+		{"source":0,"target":5,"value":1},
+		{"source":0,"target":6,"value":3},
+		{"source":0,"target":7,"value":1},
+		{"source":0,"target":8,"value":1},
+		{"source":0,"target":9,"value":1},
+		{"source":0,"target":10,"value":1},
+		{"source":0,"target":11,"value":1},
+		{"source":1,"target":9,"value":1},
+		{"source":1,"target":11,"value":2},
+		{"source":3,"target":4,"value":2},
+		{"source":3,"target":5,"value":1},
+		{"source":3,"target":9,"value":2},
+		{"source":5,"target":6,"value":1},
+		{"source":6,"target":4,"value":2},
+		{"source":7,"target":1,"value":1}
+	]
+}
