@@ -19,21 +19,18 @@ function handleFileSelect(event) {
 document.addEventListener("keyup", shortcutHandler, false);
 function shortcutHandler(event) {
     switch (event.keyCode) {
+        case 67:    // c
+            coloring(); return;
         case 76:    // l
-            hideLabel();
-            return;
+            hideLabel(); return;
         case 79:    // o
-            resetZoom();
-            return;
+            resetZoom(); return;
         case 80:    // p
-            savePNG();
-            return;
+            savePNG(); return;
         case 82:    // r
-            reDraw(curFilename);
-            return;
+            reDraw(curFilename); return;
         case 83:    // s
-            saveSVG();
-            return;
+            saveSVG(); return;
     }
 }
 
@@ -167,6 +164,23 @@ function savePNG() {
         a.href = canvas.toDataURL("image/png");
         a.click();
     };
+}
+
+// Coloring nodes
+var colorMode = 0;
+function coloring() {
+    svg.selectAll(".node")
+        .select("circle")
+		.style("fill", function (d) {
+		    switch (colorMode) {
+		        case 0:
+		            return "#eee";
+		        case 1:
+		            if (d.group === -1) return "#eee";
+		            else return color(d.group);
+		    }
+		})
+    colorMode = (colorMode + 1) % 2;
 }
 
 // Turn on / off label
@@ -307,7 +321,7 @@ function visualize(filename) {
 		node.append("circle")
 			.attr("r", 10)
 			.style("fill", function(d) {
-				if (d.group === -1) return "#fff";
+				if (d.group === -1) return "#eee";
 				else return color(d.group);
 			})
 			.style("stroke", color_node_stroke)

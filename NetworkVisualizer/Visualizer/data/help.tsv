@@ -1,4 +1,5 @@
 shortcut	function
+c	Coloring on/off
 r	Redraw image
 o	Reset position of image
 l	Show/hide labels of nodes
