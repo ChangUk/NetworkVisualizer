@@ -67,8 +67,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="JSONBuilder.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SQLiteAdapter.cs" />
+    <Compile Include="UsageDataMaker.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -123,5 +123,47 @@ namespace NetworkVisualizer {
             }
             return mentionCount;
         }
+
+        public List<KeyValuePair<long, DateTime>>  getTweetingHistory(string userId) {
+            List<KeyValuePair<long, DateTime>> records = new List<KeyValuePair<long, DateTime>>();
+            DateTime start = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            // Tweet
+            using (SQLiteCommand cmd = new SQLiteCommand(conn)) {
+                cmd.CommandText = "SELECT id, date FROM tweet WHERE author = " + userId;
+                using (SQLiteDataReader reader = cmd.ExecuteReader()) {
+                    while (reader.Read()) {
+                        long tweet = (long)reader.GetValue(0);
+                        DateTime date = start.AddMilliseconds((long)reader.GetValue(1)).ToLocalTime();
+                        records.Add(new KeyValuePair<long, DateTime>(tweet, date));
+                    }
+                }
+            }
+            // Retweet
+            using (SQLiteCommand cmd = new SQLiteCommand(conn)) {
+                cmd.CommandText = "SELECT tweet, date FROM retweet WHERE user = " + userId;
+                using (SQLiteDataReader reader = cmd.ExecuteReader()) {
+                    while (reader.Read()) {
+                        long tweet = (long)reader.GetValue(0);
+                        DateTime date = start.AddMilliseconds((long)reader.GetValue(1)).ToLocalTime();
+                        records.Add(new KeyValuePair<long, DateTime>(tweet, date));
+                    }
+                }
+            }
+            // quote
+            using (SQLiteCommand cmd = new SQLiteCommand(conn)) {
+                cmd.CommandText = "SELECT tweet, date FROM quote WHERE user = " + userId;
+                using (SQLiteDataReader reader = cmd.ExecuteReader()) {
+                    while (reader.Read()) {
+                        long tweet = (long)reader.GetValue(0);
+                        DateTime date = start.AddMilliseconds((long)reader.GetValue(1)).ToLocalTime();
+                        records.Add(new KeyValuePair<long, DateTime>(tweet, date));
+                    }
+                }
+            }
+
+            // Sort list by datetime
+            records.Sort((x, y) => x.Value.CompareTo(y.Value));
+            return records;
+        }
     }
 }
